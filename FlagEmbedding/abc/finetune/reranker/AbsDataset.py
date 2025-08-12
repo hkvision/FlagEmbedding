@@ -64,8 +64,8 @@ class AbsRerankerTrainDataset(Dataset):
         Returns:
             datasets.Dataset: Loaded HF dataset.
         """
-        if dist.get_rank() == 0:
-            logger.info(f'loading data from {file_path} ...')
+        # if dist.get_rank() == 0:
+        #     logger.info(f'loading data from {file_path} ...')
 
         temp_dataset = datasets.load_dataset('json', data_files=file_path, split='train', cache_dir=self.args.cache_path)
         if len(temp_dataset) > self.args.max_example_num_per_dataset:
@@ -148,6 +148,7 @@ class AbsRerankerTrainDataset(Dataset):
             neg_idxs = random.sample(neg_all_idx * num, train_group_size - 1)
         else:
             neg_idxs = random.sample(neg_all_idx, self.args.train_group_size - 1)
+        # neg_idxs.sort()
         for neg_idx in neg_idxs:
             passages.append(data['neg'][neg_idx])
 

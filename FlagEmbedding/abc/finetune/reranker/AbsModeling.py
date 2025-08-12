@@ -79,16 +79,25 @@ class AbsRerankerModel(ABC, nn.Module):
         if teacher_scores is not None:
             teacher_scores = torch.Tensor(teacher_scores)
             teacher_targets = teacher_scores.view(self.train_batch_size, -1)
-            teacher_targets = torch.softmax(teacher_targets.detach(), dim=-1)
+            # teacher_targets = torch.softmax(teacher_targets.detach(), dim=-1)  # No need for listwise ranking
 
         if self.training:
             grouped_logits = ranker_logits.view(self.train_batch_size, -1)
-            target = torch.zeros(self.train_batch_size, device=grouped_logits.device, dtype=torch.long)
-            loss = self.compute_loss(grouped_logits, target)
-            if teacher_scores is not None:
+            if teacher_scores is None:
+                target = torch.zeros(self.train_batch_size, device=grouped_logits.device, dtype=torch.long)
+                loss = self.compute_loss(grouped_logits, target)
+            else:
                 teacher_targets = teacher_targets.to(grouped_logits.device)
                 # print(teacher_targets, torch.mean(torch.sum(torch.log_softmax(grouped_logits, dim=-1) * teacher_targets, dim=-1)))
-                loss += - torch.mean(torch.sum(torch.log_softmax(grouped_logits, dim=-1) * teacher_targets, dim=-1))
+                # loss += - torch.mean(torch.sum(torch.log_softmax(grouped_logits, dim=-1) * teacher_targets, dim=-1))
+                train_group_size = grouped_logits.size()[1]
+                sorted_targets, indices = torch.sort(teacher_targets, descending=True, dim=1)
+                sorted_scores = torch.gather(grouped_logits, 1, indices)
+                loss = 0
+                for i in range(train_group_size):
+                    log_sum_exp = torch.logsumexp(sorted_scores[:, i:], dim=1)
+                    loss += (log_sum_exp - sorted_scores[:, i]).mean()
+                loss = loss / train_group_size
         else:
             loss = None
 
