@@ -65,7 +65,7 @@ class AbsRerankerModel(ABC, nn.Module):
         """
         pass
 
-    def forward(self, pair: Union[Dict[str, Tensor], List[Dict[str, Tensor]]] = None, teacher_scores: Optional[Tensor] = None, **kwargs):
+    def forward(self, pair: Union[Dict[str, Tensor], List[Dict[str, Tensor]]] = None, teacher_scores: Optional[Tensor] = None):
         """The computation performed at every call.
 
         Args:
