@@ -141,4 +141,4 @@ class AbsRerankerRunner(ABC):
         # Training
         self.trainer.train(resume_from_checkpoint=self.training_args.resume_from_checkpoint)
         # self.trainer.save_model()
-        self.model.save_pretrained("lora_model")
+        self.model.save_pretrained(os.path.join(self.trainer.args.output_dir, "final-lora"))

@@ -54,7 +54,7 @@ class EncoderOnlyRerankerRunner(AbsRerankerRunner):
             # "target_modules": ["query", "key", "value", "dense", "out_proj"],
             "inference_mode": False,
             "r": 32,
-            "lora_alpha": 32,
+            "lora_alpha": 64,
             "lora_dropout": 0.1,
         }
         lora_config = LoraConfig(**lora_kwargs)
