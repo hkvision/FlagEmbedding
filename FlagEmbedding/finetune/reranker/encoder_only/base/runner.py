@@ -48,6 +48,19 @@ class EncoderOnlyRerankerRunner(AbsRerankerRunner):
             trust_remote_code=self.model_args.trust_remote_code
         )
 
+        if self.model_args.use_lora:
+            from peft import LoraConfig, TaskType, get_peft_model
+            lora_kwargs = {
+                "task_type": TaskType.SEQ_CLS,
+                # "target_modules": ["query", "key", "value", "dense", "out_proj"],
+                "inference_mode": False,
+                "r": 32,
+                "lora_alpha": 64,
+                "lora_dropout": 0.1,
+            }
+            lora_config = LoraConfig(**lora_kwargs)
+            base_model = get_peft_model(base_model, lora_config)
+
         model = CrossEncoderModel(
             base_model,
             tokenizer=tokenizer,
