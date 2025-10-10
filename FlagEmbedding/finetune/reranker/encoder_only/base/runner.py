@@ -22,31 +22,49 @@ class EncoderOnlyRerankerRunner(AbsRerankerRunner):
         Returns:
             Tuple[PreTrainedTokenizer, AbsEmbedderModel]: Tokenizer and model instances.
         """
-        tokenizer = AutoTokenizer.from_pretrained(
-            self.model_args.model_name_or_path,
-            cache_dir=self.model_args.cache_dir,
-            token=self.model_args.token,
-            trust_remote_code=self.model_args.trust_remote_code
-        )
+        use_unsloth = True
+        if use_unsloth:
+            from unsloth import FastLanguageModel, FastModel
+            import torch
+            base_model, tokenizer = FastModel.from_pretrained(
+                self.model_args.model_name_or_path,
+                auto_model=AutoModelForSequenceClassification,
+                max_seq_length=1024,
+                dtype=torch.float32,
+                # dtype=torch.bfloat16,
+                full_finetuning=True,
+                load_in_4bit=False,
+                device_map="xpu:0",
+                use_gradient_checkpointing=True,
+                num_labels=1
+            )
+            print("==================Using Unsloth model==================")
+        else:
+            tokenizer = AutoTokenizer.from_pretrained(
+                self.model_args.model_name_or_path,
+                cache_dir=self.model_args.cache_dir,
+                token=self.model_args.token,
+                trust_remote_code=self.model_args.trust_remote_code
+            )
 
-        num_labels = 1
-        config = AutoConfig.from_pretrained(
-            self.model_args.config_name if self.model_args.config_name else self.model_args.model_name_or_path,
-            num_labels=num_labels,
-            cache_dir=self.model_args.cache_dir,
-            token=self.model_args.token,
-            trust_remote_code=self.model_args.trust_remote_code,
-        )
-        logger.info('Config: %s', config)
+            num_labels = 1
+            config = AutoConfig.from_pretrained(
+                self.model_args.config_name if self.model_args.config_name else self.model_args.model_name_or_path,
+                num_labels=num_labels,
+                cache_dir=self.model_args.cache_dir,
+                token=self.model_args.token,
+                trust_remote_code=self.model_args.trust_remote_code,
+            )
+            logger.info('Config: %s', config)
 
-        base_model = AutoModelForSequenceClassification.from_pretrained(
-            self.model_args.model_name_or_path,
-            config=config,
-            cache_dir=self.model_args.cache_dir,
-            token=self.model_args.token,
-            from_tf=bool(".ckpt" in self.model_args.model_name_or_path),
-            trust_remote_code=self.model_args.trust_remote_code
-        )
+            base_model = AutoModelForSequenceClassification.from_pretrained(
+                self.model_args.model_name_or_path,
+                config=config,
+                cache_dir=self.model_args.cache_dir,
+                token=self.model_args.token,
+                from_tf=bool(".ckpt" in self.model_args.model_name_or_path),
+                trust_remote_code=self.model_args.trust_remote_code
+            )
 
         model = CrossEncoderModel(
             base_model,
