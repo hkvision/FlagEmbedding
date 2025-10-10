@@ -41,11 +41,11 @@ class EncoderOnlyRerankerRunner(AbsRerankerRunner):
                 auto_model=AutoModelForSequenceClassification,
                 max_seq_length=self.data_args.query_max_len + self.data_args.passage_max_len,  # 1024
                 config=config,
-                dtype=torch.float32,  # align with original transformers
-                # dtype=torch.bfloat16,
+                # dtype=torch.float32,  # align with original transformers
+                # dtype=torch.bfloat16,  # default to use bfloat16
                 full_finetuning=True,
                 load_in_4bit=False,
-                device_map="xpu:0",
+                # device_map="xpu:0",  # will automatically use xpu and cuda if available
                 use_gradient_checkpointing=self.training_args.gradient_checkpointing,
                 # num_labels=1   # specified in config
                 cache_dir=self.model_args.cache_dir,
