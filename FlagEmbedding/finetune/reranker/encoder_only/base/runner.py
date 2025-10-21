@@ -32,8 +32,7 @@ class EncoderOnlyRerankerRunner(AbsRerankerRunner):
         )
         logger.info('Config: %s', config)
 
-        use_unsloth = True
-        if use_unsloth:
+        if self.model_args.use_unsloth:
             from unsloth import FastLanguageModel, FastModel
             import torch
             base_model, tokenizer = FastModel.from_pretrained(
