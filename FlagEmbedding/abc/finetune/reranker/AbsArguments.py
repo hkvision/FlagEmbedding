@@ -38,6 +38,10 @@ class AbsRerankerModelArguments:
         default_factory=lambda: os.getenv('HF_TOKEN', None),
         metadata={"help": "The token to use when accessing the model."}
     )
+    use_unsloth: bool = field(
+        default=True,
+        metadata={"help": "Whether to use unsloth for finetuning"}
+    )
     # finetune_type: str = field(
     #     default='sratch',
     #     metadata={"help": "Type of finetune, ['sratch', 'finetune']"}
