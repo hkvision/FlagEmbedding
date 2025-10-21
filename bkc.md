@@ -33,6 +33,10 @@ git clone https://github.com/hkvision/FlagEmbedding.git
 
 
 ### Run
+- Data: https://github.com/hkvision/MetaSearch/blob/main/finetune/no-train-eval-split/train_dataset_500.jsonl
+- Dataset format: jsonl每一行是个json，包含query和pos/neg answer以及score。score是relative score，训练的时候不会看具体数值，只是看相对的大小
+<img width="1524" height="488" alt="image" src="https://github.com/user-attachments/assets/63834603-8f4a-42ef-bed3-789e18baad02" />
+
 - run_finetune.py里可以改参数不使用unsloth
 - 默认精度用的是bf16，修改[这里](./FlagEmbedding/finetune/reranker/encoder_only/base/runner.py#L43)可以用fp32
 ```
@@ -70,3 +74,4 @@ python __main__.py --model_name_or_path /home/arda/kai/AI-NAS/bge-reranker-v2-m3
 - B60上finetune速度大概是1.63s/it batch=4。性能上使用unsloth目前没有优化，可能还比原生Trainer慢一点。
 - unsloth memory的使用上bf16 10348.38M, fp32 13297.44M；不使用unsloth fp32 13063.81M... emmm都用fp32的情况下memory也没提升...
 - unsloth对general bert模型优化不足，我们的行为和rtx上一致,有需要的话还是有优化空间的。unsloth可能对seq length超过1024以及bf16模型会有点提升。
+
