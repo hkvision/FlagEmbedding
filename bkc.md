@@ -33,6 +33,8 @@ git clone https://github.com/hkvision/FlagEmbedding.git
 
 
 ### Run
+- run_finetune.py里可以改参数不使用unsloth
+- 默认精度用的是bf16，修改[这里](../FlagEmbedding/finetune/reranker/encoder_only/base/runner.py#L43)可以用fp32
 ```
 export UNSLOTH_DISABLE_STATISTICS=1
 export USE_SYCL_KERNELS=0
@@ -63,3 +65,7 @@ python __main__.py --model_name_or_path /home/arda/kai/AI-NAS/bge-reranker-v2-m3
     --save_steps 1000 \
     --gradient_checkpointing
 ```
+
+### Results on 500 records
+- B60上finetune速度大概是1.63s/it batch=4。性能上使用unsloth目前没有优化，可能还比原生Trainer慢一点。
+- unsloth memory的使用上bf16 10348.38M, fp32 13297.44M；不使用unsloth fp32 13063.81M... emmm都用fp32的情况下memory也没提升？
