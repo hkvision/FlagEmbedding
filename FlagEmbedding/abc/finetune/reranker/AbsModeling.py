@@ -98,7 +98,7 @@ class AbsRerankerModel(ABC, nn.Module):
                     log_sum_exp = torch.logsumexp(sorted_scores[:, i:], dim=1)
                     loss += (log_sum_exp - sorted_scores[:, i]).mean()
                 loss = loss / train_group_size
-                print("listmle: ", loss)
+                # print("listmle: ", loss)
 
                 margin_loss_fn = nn.MarginRankingLoss(margin=1.0)
                 margin_loss = 0
@@ -106,9 +106,12 @@ class AbsRerankerModel(ABC, nn.Module):
                     pos_score = sorted_scores[:, i]
                     neg_score = sorted_scores[:, i + 1]
                     target = torch.ones_like(pos_score)  # pos_score should be > neg_score
-                    margin_loss += margin_loss_fn(pos_score, neg_score, target)
-                margin_loss = margin_loss / (train_group_size - 1)
-                print("margin: ", margin_loss)
+                    m = margin_loss_fn(pos_score, neg_score, target)
+                    if i == 0:  # Add more weight on the first positive desc
+                        m = m * 5
+                    margin_loss += m
+                margin_loss = margin_loss / (train_group_size - 1 + 4)
+                # print("margin: ", margin_loss)
                 loss += margin_loss
 
         else:
